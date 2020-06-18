@@ -8,12 +8,12 @@ plugins {
 group = "com.justai.jaicf"
 version = "1.0.0"
 
-val jaicf = "0.4.0"
+val jaicf = "0.4.2"
 val slf4j = "1.7.30"
 val ktor = "1.3.1"
 
 application {
-    mainClassName = "com.justai.jaicf.template.ServerKt"
+    mainClassName = "com.justai.jaicf.template.connectors.WebhookConnectionKt"
 }
 
 repositories {
@@ -37,6 +37,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.14.0")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
     testRuntime("org.junit.jupiter:junit-jupiter-engine:5.6.0")
+    implementation("com.justai.jaicf:jaicp:$jaicf")
 }
 
 tasks {
