@@ -7,6 +7,9 @@ import com.justai.jaicf.model.scenario.Scenario
 import com.justai.jaicf.template.City
 import com.justai.jaicf.template.Weather
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.features.json.serializer.KotlinxSerializer
 import io.ktor.client.request.get
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
@@ -14,9 +17,14 @@ import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.content
 
-object MainScenario: Scenario() {
+object MainScenario : Scenario() {
 
     private val json = Json(JsonConfiguration.Stable.copy(strictMode = false, encodeDefaults = false))
+    private val httpClient = HttpClient(CIO) {
+        install(JsonFeature) {
+            serializer = KotlinxSerializer()
+        }
+    }
 
     init {
         state("main") {
@@ -58,10 +66,11 @@ object MainScenario: Scenario() {
                     val lat = city.lat
                     val lon = city.lon
                     val name = city.name
-                    val client = HttpClient()
-                    val res: JsonObject = runBlocking {client.get<JsonObject>("http://api.openweathermap.org/data/2.5/weather?APPID=1955eacf9da35a2c323eb7c353e2a9c2&units=metric&lat=${lat}&lon=${lon}")}
+                    val res: JsonObject = runBlocking {
+                        httpClient.get("http://api.openweathermap.org/data/2.5/weather?APPID=1955eacf9da35a2c323eb7c353e2a9c2&units=metric&lat=${lat}&lon=${lon}")
+                    }
                     val weather = res.get("main")?.jsonObject?.get("temp")?.content
-                reactions.say("В $name сейчас температура $weather градусов")
+                    reactions.say("В $name сейчас температура $weather градусов")
                 }
             }
         }
