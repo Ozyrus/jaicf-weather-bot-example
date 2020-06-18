@@ -11,10 +11,12 @@ import io.ktor.client.request.get
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.content
 
 object MainScenario: Scenario() {
 
-    private val json = Json(JsonConfiguration.Stable.copy( encodeDefaults = false))
+    private val json = Json(JsonConfiguration.Stable.copy(strictMode = false, encodeDefaults = false))
 
     init {
         state("main") {
@@ -57,10 +59,9 @@ object MainScenario: Scenario() {
                     val lon = city.lon
                     val name = city.name
                     val client = HttpClient()
-                    val response =  runBlocking {client.get<String>("http://api.openweathermap.org/data/2.5/weather?APPID=1955eacf9da35a2c323eb7c353e2a9c2&units=metric&lat=${lat}&lon=${lon}")}
-                    val weather = json.parse(Weather.serializer(), response)
-                    val temperature = weather.temp
-                reactions.say("В $name сейчас температура $temperature градусов")
+                    val res: JsonObject = runBlocking {client.get<JsonObject>("http://api.openweathermap.org/data/2.5/weather?APPID=1955eacf9da35a2c323eb7c353e2a9c2&units=metric&lat=${lat}&lon=${lon}")}
+                    val weather = res.get("main")?.jsonObject?.get("temp")?.content
+                reactions.say("В $name сейчас температура $weather градусов")
                 }
             }
         }
@@ -71,7 +72,7 @@ object MainScenario: Scenario() {
             }
 
             action {
-                reactions.say("This is a globat catchAll")
+                reactions.say("This is a global catchAll")
                 reactions.actions?.run {
                     say("Bye bye!")
                     endConversation()

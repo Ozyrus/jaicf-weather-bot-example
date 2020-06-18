@@ -22,15 +22,15 @@ private val contextManager = System.getenv("MONGODB_URI")?.let { url ->
 
 } ?: InMemoryBotContextManager
 
-val CailaActivator = CailaIntentActivator.Factory(CailaNLUSettings("dd103d20-2fbe-489a-bf72-521a2a07708f",0.2,"https://jaicf01-demo-htz.lab.just-ai.com/"))
+val CailaActivator = CailaIntentActivator.Factory(CailaNLUSettings("dd103d20-2fbe-489a-bf72-521a2a07708f",0.2))
 
 val templateBot = BotEngine(
     model = MainScenario.model,
     contextManager = contextManager,
     activators = arrayOf(
         ActionsDialogflowActivator,
-        CatchAllActivator,
         CailaActivator,
-        RegexActivator
+        RegexActivator,
+        CatchAllActivator
     )
 )
