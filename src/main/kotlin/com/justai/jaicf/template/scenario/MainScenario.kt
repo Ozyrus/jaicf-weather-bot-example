@@ -67,7 +67,7 @@ object MainScenario : Scenario() {
                     val lon = city.lon
                     val name = city.name
                     val res: JsonObject = runBlocking {
-                        httpClient.get("http://api.openweathermap.org/data/2.5/weather?APPID=1955eacf9da35a2c323eb7c353e2a9c2&units=metric&lat=${lat}&lon=${lon}")
+                        httpClient.get<JsonObject>("http://api.openweathermap.org/data/2.5/weather?APPID=1955eacf9da35a2c323eb7c353e2a9c2&units=metric&lat=${lat}&lon=${lon}")
                     }
                     val weather = res.get("main")?.jsonObject?.get("temp")?.content
                     reactions.say("В $name сейчас температура $weather градусов")
