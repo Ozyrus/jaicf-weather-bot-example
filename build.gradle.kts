@@ -2,6 +2,7 @@ plugins {
     application
     kotlin("jvm") version "1.3.61"
     id("com.github.johnrengelman.shadow") version "5.0.0"
+    kotlin("plugin.serialization") version "1.3.70"
 }
 
 group = "com.justai.jaicf"
@@ -19,19 +20,21 @@ repositories {
     mavenLocal()
     mavenCentral()
     jcenter()
+    maven(uri("https://jitpack.io"))
 }
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
-
+    implementation("com.justai.jaicf:telegram:$jaicf")
     implementation("org.slf4j:slf4j-simple:$slf4j")
     implementation("org.slf4j:slf4j-log4j12:$slf4j")
-
+    implementation("com.justai.jaicf:caila:$jaicf")
     implementation("com.justai.jaicf:core:$jaicf")
     implementation("com.justai.jaicf:google-actions:$jaicf")
     implementation("com.justai.jaicf:mongo:$jaicf")
-
+    implementation("io.ktor:ktor-client-cio:$ktor")
     implementation("io.ktor:ktor-server-netty:$ktor")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.14.0")
 }
 
 tasks {
