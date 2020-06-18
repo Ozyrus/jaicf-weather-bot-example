@@ -22,7 +22,7 @@ private val contextManager = System.getenv("MONGODB_URI")?.let { url ->
 
 } ?: InMemoryBotContextManager
 
-val CailaActivator = CailaIntentActivator.Factory(CailaNLUSettings("2a130efb-c133-4bf3-bbb8-88f9a91887b4",0.2,"https://zenbot-dev.just-ai.com/api/caila/p/"))
+val CailaActivator = CailaIntentActivator.Factory(CailaNLUSettings("dd103d20-2fbe-489a-bf72-521a2a07708f",0.2,"https://jaicf01-demo-htz.lab.just-ai.com/"))
 
 val templateBot = BotEngine(
     model = MainScenario.model,

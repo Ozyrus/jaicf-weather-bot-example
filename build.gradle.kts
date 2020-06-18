@@ -35,6 +35,8 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:$ktor")
     implementation("io.ktor:ktor-server-netty:$ktor")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.14.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.6.0")
 }
 
 tasks {
@@ -43,6 +45,9 @@ tasks {
     }
     compileTestKotlin {
         kotlinOptions.jvmTarget = "1.8"
+    }
+    test {
+        useJUnitPlatform()
     }
 }
 

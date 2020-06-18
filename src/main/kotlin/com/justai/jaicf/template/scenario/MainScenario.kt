@@ -23,21 +23,26 @@ object MainScenario: Scenario() {
             }
 
             action {
-                reactions.say("Hi there mate!")
+                reactions.say("Это бот который дает прогноз погоды в твоем городе. Просто спроси его.")
             }
         }
 
-        state("fallback", noContext = true) {
+        state("hey") {
             activators {
-                catchAll()
+                intent("Привет")
             }
 
             action {
-                reactions.say("This is a globat catchAll")
-                reactions.actions?.run {
-                    say("Bye bye!")
-                    endConversation()
-                }
+                reactions.say("Привет, котик")
+            }
+        }
+        state("bye") {
+            activators {
+                intent("Пока")
+            }
+
+            action {
+                reactions.say("Пока, котик")
             }
         }
 
@@ -56,6 +61,20 @@ object MainScenario: Scenario() {
                     val weather = json.parse(Weather.serializer(), response)
                     val temperature = weather.temp
                 reactions.say("В $name сейчас температура $temperature градусов")
+                }
+            }
+        }
+
+        state("fallback", noContext = true) {
+            activators {
+                catchAll()
+            }
+
+            action {
+                reactions.say("This is a globat catchAll")
+                reactions.actions?.run {
+                    say("Bye bye!")
+                    endConversation()
                 }
             }
         }
