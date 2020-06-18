@@ -12,6 +12,7 @@ import com.mongodb.MongoClient
 import com.mongodb.MongoClientURI
 import com.justai.jaicf.activator.caila.caila
 import com.justai.jaicf.activator.caila.dto.CailaIntent
+import com.justai.jaicf.activator.regex.RegexActivator
 
 
 private val contextManager = System.getenv("MONGODB_URI")?.let { url ->
@@ -29,6 +30,7 @@ val templateBot = BotEngine(
     activators = arrayOf(
         ActionsDialogflowActivator,
         CatchAllActivator,
-        CailaActivator
+        CailaActivator,
+        RegexActivator
     )
 )

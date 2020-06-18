@@ -19,7 +19,7 @@ object MainScenario: Scenario() {
     init {
         state("main") {
             activators {
-                intent(DialogflowIntent.WELCOME)
+                regex("/start")
             }
 
             action {
