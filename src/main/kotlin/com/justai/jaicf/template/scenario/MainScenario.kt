@@ -3,6 +3,7 @@ package com.justai.jaicf.template.scenario
 import com.justai.jaicf.activator.caila.caila
 import com.justai.jaicf.channel.googleactions.actions
 import com.justai.jaicf.channel.googleactions.dialogflow.DialogflowIntent
+import com.justai.jaicf.context.BotContext
 import com.justai.jaicf.model.scenario.Scenario
 import com.justai.jaicf.template.City
 import com.justai.jaicf.template.Weather
@@ -15,9 +16,20 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.content
 
 object MainScenario : Scenario() {
+
+    class Weather(context: BotContext) {
+        var lat: Double? by context.session
+        var lon: Double? by context.session
+        var res: JsonObject? by context.session
+        var temperature: String? by context.session
+        var weather: String? by context.session
+        var name: String? by context.session
+        var feelsLike: String? by context.session
+    }
 
     private val json = Json(JsonConfiguration.Stable.copy(strictMode = false, encodeDefaults = false))
     private val httpClient = HttpClient(CIO) {
@@ -61,16 +73,20 @@ object MainScenario : Scenario() {
                 intent("Прогноз погоды")
             }
             action {
+                var weather = Weather(context)
                 activator.caila?.run {
-                    val city = json.parse(City.serializer(), slots["Город"] ?: error("Got a Null"))
-                    val lat = city.lat
-                    val lon = city.lon
-                    val name = city.name
-                    val res: JsonObject = runBlocking {
-                        httpClient.get<JsonObject>("http://api.openweathermap.org/data/2.5/weather?APPID=1955eacf9da35a2c323eb7c353e2a9c2&units=metric&lat=${lat}&lon=${lon}")
+                    val cityValue = json.parse(City.serializer(), slots["Город"] ?: error("Got a Null"))
+                    weather.lat = cityValue.lat
+                    weather.lon = cityValue.lon
+                    weather.name = cityValue.name
+                    weather.res = runBlocking {
+                        httpClient.get<JsonObject>("http://api.openweathermap.org/data/2.5/onecall?APPID=1955eacf9da35a2c323eb7c353e2a9c2&units=metric&lat=${weather.lat}&lon=${weather.lon}&lang=ru")
                     }
-                    val weather = res.get("main")?.jsonObject?.get("temp")?.content
-                    reactions.say("В $name сейчас температура $weather градусов")
+                    weather.temperature = weather.res!!.get("current")?.jsonObject?.get("temp")?.content
+                    weather.feelsLike = weather.res!!.get("current")?.jsonObject?.get("feels_like")?.content
+                    weather.weather = weather.res!!.get("current")?.jsonObject?.get("weather")?.jsonArray?.get(0)?.jsonObject?.get("description")?.content
+                    if (slots["день"] != null) reactions.say("Ты просил погоду на другой день, но я знаю только про сегодня.")
+                    reactions.say("В городе ${weather.name} сейчас температура ${weather.temperature} градусов, ощущается как ${weather.feelsLike}, ${weather.weather}.")
                 }
             }
         }
@@ -81,7 +97,7 @@ object MainScenario : Scenario() {
             }
 
             action {
-                reactions.say("This is a global catchAll")
+                reactions.say("Просто назови город, и я дам тебе прогноз на сегодня.")
                 reactions.actions?.run {
                     say("Bye bye!")
                     endConversation()
