@@ -2,7 +2,6 @@ package com.justai.jaicf.template.scenario
 
 import com.justai.jaicf.activator.caila.caila
 import com.justai.jaicf.channel.googleactions.actions
-import com.justai.jaicf.channel.googleactions.dialogflow.DialogflowIntent
 import com.justai.jaicf.context.BotContext
 import com.justai.jaicf.model.scenario.Scenario
 import com.justai.jaicf.template.City
@@ -12,14 +11,14 @@ import io.ktor.client.engine.cio.CIO
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.features.json.serializer.KotlinxSerializer
 import io.ktor.client.request.get
+import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.content
-import java.sql.Timestamp
 
+@KtorExperimentalAPI
 object MainScenario : Scenario() {
 
     class Weather(context: BotContext) {
@@ -34,7 +33,8 @@ object MainScenario : Scenario() {
     }
 
     private val json = Json(JsonConfiguration.Stable.copy(strictMode = false, encodeDefaults = false))
-    private val httpClient = HttpClient(CIO) {
+    @KtorExperimentalAPI
+    val httpClient = HttpClient(CIO) {
         install(JsonFeature) {
             serializer = KotlinxSerializer()
         }
@@ -75,7 +75,7 @@ object MainScenario : Scenario() {
                 intent("Прогноз погоды")
             }
             action {
-                var weather = Weather(context)
+                val weather = Weather(context)
                 activator.caila?.run {
                     val cityValue = json.parse(City.serializer(), slots["Город"] ?: error("Got a Null"))
                     weather.timestamp = if (slots["день"] != null)  json.parse(Datetime.serializer(), slots["день"] ?: error ("Got a Null")).timestamp/1000 + 36000 else null
@@ -86,19 +86,19 @@ object MainScenario : Scenario() {
                         httpClient.get<JsonObject>("http://api.openweathermap.org/data/2.5/onecall?APPID=1955eacf9da35a2c323eb7c353e2a9c2&units=metric&lat=${weather.lat}&lon=${weather.lon}&lang=ru")
                     }
                     if (weather.timestamp == null) {
-                        weather.temperature = weather.res!!.get("current")?.jsonObject?.get("temp")?.content
-                        weather.feelsLike = weather.res!!.get("current")?.jsonObject?.get("feels_like")?.content
-                        weather.weather = weather.res!!.get("current")?.jsonObject?.get("weather")?.jsonArray?.get(0)?.jsonObject?.get("description")?.content
+                        weather.temperature = weather.res!!["current"]?.jsonObject?.get("temp")?.content
+                        weather.feelsLike = weather.res!!["current"]?.jsonObject?.get("feels_like")?.content
+                        weather.weather = weather.res!!["current"]?.jsonObject?.get("weather")?.jsonArray?.get(0)?.jsonObject?.get("description")?.content
                         reactions.say("В городе ${weather.name} сейчас температура ${weather.temperature} градусов, ощущается как ${weather.feelsLike}, ${weather.weather}.")
                     } else {
-                        val dailyJson = weather.res!!.get("daily")?.jsonArray
+                        val dailyJson = weather.res!!["daily"]?.jsonArray
                         if (dailyJson != null) {
                             for (i in dailyJson) {
-                                val timestamp = i?.jsonObject?.get("dt")?.content?.toLong()
+                                val timestamp = i.jsonObject["dt"]?.content?.toLong()
                                 if (timestamp == weather.timestamp) {
-                                    weather.temperature = i?.jsonObject?.get("temp")?.jsonObject?.get("day")?.content
-                                    weather.feelsLike = i?.jsonObject?.get("feels_like")?.jsonObject?.get("day")?.content
-                                    weather.weather = i?.jsonObject?.get("weather")?.jsonArray?.get(0)?.jsonObject?.get("description")?.content
+                                    weather.temperature = i.jsonObject["temp"]?.jsonObject?.get("day")?.content
+                                    weather.feelsLike = i.jsonObject["feels_like"]?.jsonObject?.get("day")?.content
+                                    weather.weather = i.jsonObject["weather"]?.jsonArray?.get(0)?.jsonObject?.get("description")?.content
                                     break
                                 }
                             }
