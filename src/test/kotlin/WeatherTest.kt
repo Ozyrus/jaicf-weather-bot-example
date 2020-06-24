@@ -13,6 +13,6 @@ class WeatherTest: ScenarioTest(MainScenario) {
 
     @Test
     fun `Gives you weather`() {
-        query("Питер") endsWithState  "city"
+        query("Питер") endsWithState  "/city"
     }
 }
